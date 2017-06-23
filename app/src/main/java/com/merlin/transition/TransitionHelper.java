@@ -49,9 +49,6 @@ public class TransitionHelper {
 
     public void add(final View... views) {
         clear();
-        if (viewList != null) {
-            viewList = new ArrayList<>();
-        }
         if (views != null && views.length > 0) {
             handler.post(new Runnable() {
                 @Override
@@ -277,21 +274,23 @@ public class TransitionHelper {
                 transits.transit = null;
             }
             transitArray.clear();
-            //清除临时view
-            if (viewList != null) {
-                for (View view : viewList) {
-                    if (view == null) {
-                        continue;
-                    }
-                    view.destroyDrawingCache();
-                }
-                viewList.clear();
-            }
-            //回收资源
-            System.gc();
         } else {
             transitArray = new SparseArray<>();
         }
+        //清除临时view
+        if (viewList != null) {
+            for (View view : viewList) {
+                if (view == null) {
+                    continue;
+                }
+                view.destroyDrawingCache();
+            }
+            viewList.clear();
+        } else {
+            viewList = new ArrayList<>();
+        }
+        //回收资源
+        System.gc();
     }
 
     private Bitmap createBitmap(View view, int width, int height, boolean needOnLayout) {
