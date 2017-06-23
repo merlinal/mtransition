@@ -155,7 +155,6 @@ public class TransitionHelper {
                     final ImageView originView = new ImageView(activity);
                     if (transit.bitmap != null) {
                         originView.setImageBitmap(transit.bitmap);
-                        transit.bitmap.recycle();
                     }
                     RelativeLayout.LayoutParams originParams = new RelativeLayout.LayoutParams(transit.originWidth, transit.originHeight);
                     originParams.setMargins(transit.originRect.left, transit.originRect.top, 0, 0);
@@ -316,7 +315,6 @@ public class TransitionHelper {
             view.destroyDrawingCache();
             view.setWillNotCacheDrawing(willNotCache);
             view.setDrawingCacheBackgroundColor(color);
-            cacheBitmap.recycle();
         }
         return bitmap;
     }
