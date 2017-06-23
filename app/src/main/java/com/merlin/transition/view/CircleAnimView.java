@@ -56,7 +56,9 @@ public class CircleAnimView extends AnimView {
 
     @Override
     public void startAnim(Transit transit) {
-        originalBitmap = Bitmap.createBitmap(transit.windowWidth, transit.windowHeight, Bitmap.Config.ARGB_4444);
+        originalBitmap = Bitmap.createBitmap(transit.windowWidth < 1 ? canvasWidth : transit.windowWidth,
+                transit.windowHeight < 1 ? canvasHeight : transit.windowHeight,
+                Bitmap.Config.ARGB_4444);
         canvasWidth = transit.windowWidth;
         canvasHeight = transit.windowHeight;
         mCanvas = new Canvas(originalBitmap);
@@ -90,7 +92,9 @@ public class CircleAnimView extends AnimView {
             radius += increaseSpeed;
             increaseSpeed += 6;
             paint.setXfermode(null);
-            canvas.drawBitmap(originalBitmap, 0, 0, null);
+            if(!originalBitmap.isRecycled()){
+                canvas.drawBitmap(originalBitmap, 0, 0, null);
+            }
             invalidate();
         } else {
             startCircleAnim = false;
@@ -98,6 +102,7 @@ public class CircleAnimView extends AnimView {
             setVisibility(GONE);
             //recycle
             if (originalBitmap != null) {
+                originalBitmap.recycle();
                 originalBitmap = null;
             }
         }
