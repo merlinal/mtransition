@@ -180,10 +180,10 @@ public class TransitionHelper {
                         startAnim(originAnim, translateAnim, animView, targetAnim, transit);
                     }
                 }
-                //释放缓存
-                clear(clearDelay < 1 ? 5 * 1000 : clearDelay);
             }
         });
+        //释放缓存
+        clear(clearDelay < 1 ? 5 * 1000 : clearDelay);
     }
 
     private void startAnim(final AnimatorSet originAnim, final AnimatorSet translateAnim, final AnimView animView, final AnimatorSet targetAnim, final Transit transit) {
