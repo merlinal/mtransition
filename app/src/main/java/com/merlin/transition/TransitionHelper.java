@@ -42,16 +42,16 @@ public class TransitionHelper {
 
     private Handler handler = new Handler();
 
-    private Strategy strategy;
+    //    private Strategy strategy;
     private SparseArray<Transits> transitArray;
 
-    public TransitionHelper setStrategy(Strategy strategy) {
-        this.strategy = strategy;
-        return Inst();
-    }
+//    public TransitionHelper setStrategy(Strategy strategy) {
+//        this.strategy = strategy;
+//        return Inst();
+//    }
 
     public void add(final View... views) {
-        transitArray = new SparseArray<>();
+        clear();
         if (views != null && views.length > 0) {
             handler.post(new Runnable() {
                 @Override
@@ -81,7 +81,11 @@ public class TransitionHelper {
         }
     }
 
-    public void start(final Activity activity, final long clearDelay, final View... views) {
+    public void start(final Activity activity, final Strategy strategy, final View... views) {
+        start(activity, strategy, 3 * 1000, views);
+    }
+
+    public void start(final Activity activity, final Strategy strategy, final long clearDelay, final View... views) {
         if (strategy == null || activity == null) {
             return;
         }
@@ -249,11 +253,28 @@ public class TransitionHelper {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                transitArray = null;
-                strategy = null;
-                System.gc();
+                clear();
             }
         }, delayedTime);
+    }
+
+    private void clear() {
+        if (transitArray != null) {
+            for (int i = 0; i < transitArray.size(); i++) {
+                Transits transits = transitArray.get(i);
+                transits.originView = null;
+                transits.targetView = null;
+                if (transits.transit != null) {
+                    transits.transit.bitmap.recycle();
+                    transits.transit.bitmap = null;
+                }
+                transits.transit = null;
+            }
+            transitArray.clear();
+            System.gc();
+        } else {
+            transitArray = new SparseArray<>();
+        }
     }
 
     private Bitmap createBitmap(View view, int width, int height, boolean needOnLayout) {

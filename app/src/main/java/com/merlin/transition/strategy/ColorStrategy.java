@@ -31,7 +31,7 @@ public class ColorStrategy extends Strategy {
     @Override
     public AnimatorSet loadOriginView(ImageView originView) {
         AnimatorSet anim = new AnimatorSet();
-        anim.play(ObjectAnimator.ofFloat(originView, "alpha", 1f, 0f));
+        anim.play(ObjectAnimator.ofFloat(originView, "alpha", 1f, 1f));
         anim.setDuration(200);
         return anim;
     }
