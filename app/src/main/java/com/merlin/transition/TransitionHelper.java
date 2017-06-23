@@ -23,6 +23,8 @@ import com.merlin.transition.model.Transits;
 import com.merlin.transition.strategy.Strategy;
 import com.merlin.transition.view.AnimView;
 
+import java.util.ArrayList;
+
 /**
  * Created by ncm on 2017/6/16.
  */
@@ -43,9 +45,13 @@ public class TransitionHelper {
     private Handler handler = new Handler();
 
     private SparseArray<Transits> transitArray;
+    private ArrayList<View> viewList;
 
     public void add(final View... views) {
         clear();
+        if (viewList != null) {
+            viewList = new ArrayList<>();
+        }
         if (views != null && views.length > 0) {
             handler.post(new Runnable() {
                 @Override
@@ -116,6 +122,7 @@ public class TransitionHelper {
                 if (animView != null) {
                     RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
                     parent.addView(animView, params);
+                    viewList.add(animView);
                 }
 
                 for (int i = 0; i < transitArray.size(); i++) {
@@ -149,6 +156,7 @@ public class TransitionHelper {
 
                     //create a temp ImageView to replace origin view
                     final ImageView originView = new ImageView(activity);
+                    viewList.add(originView);
                     if (transit.bitmap != null) {
                         originView.setImageBitmap(transit.bitmap);
                     }
@@ -233,7 +241,6 @@ public class TransitionHelper {
                 @Override
                 public void onAnimEnd() {
                     startTargetAnim(targetAnim);
-                    animView.destroyDrawingCache();
                 }
             });
         } else {
@@ -258,6 +265,7 @@ public class TransitionHelper {
 
     private void clear() {
         if (transitArray != null) {
+            //清除动画混存
             for (int i = 0; i < transitArray.size(); i++) {
                 Transits transits = transitArray.get(i);
                 transits.originView = null;
@@ -269,6 +277,17 @@ public class TransitionHelper {
                 transits.transit = null;
             }
             transitArray.clear();
+            //清除临时view
+            if (viewList != null) {
+                for (View view : viewList) {
+                    if (view == null) {
+                        continue;
+                    }
+                    view.destroyDrawingCache();
+                }
+                viewList.clear();
+            }
+            //回收资源
             System.gc();
         } else {
             transitArray = new SparseArray<>();
