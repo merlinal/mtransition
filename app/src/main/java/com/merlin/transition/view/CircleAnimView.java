@@ -92,19 +92,19 @@ public class CircleAnimView extends AnimView {
             radius += increaseSpeed;
             increaseSpeed += 6;
             paint.setXfermode(null);
-            if(!originalBitmap.isRecycled()){
+            if (!originalBitmap.isRecycled()) {
                 canvas.drawBitmap(originalBitmap, 0, 0, null);
             }
             invalidate();
         } else {
             startCircleAnim = false;
-            notifyEnd();
             setVisibility(GONE);
             //recycle
             if (originalBitmap != null) {
                 originalBitmap.recycle();
                 originalBitmap = null;
             }
+            notifyEnd();
         }
     }
 

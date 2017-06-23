@@ -42,13 +42,7 @@ public class TransitionHelper {
 
     private Handler handler = new Handler();
 
-    //    private Strategy strategy;
     private SparseArray<Transits> transitArray;
-
-//    public TransitionHelper setStrategy(Strategy strategy) {
-//        this.strategy = strategy;
-//        return Inst();
-//    }
 
     public void add(final View... views) {
         clear();
@@ -87,9 +81,11 @@ public class TransitionHelper {
 
     public void start(final Activity activity, final Strategy strategy, final long clearDelay, final View... views) {
         if (strategy == null || activity == null) {
+            clear();
             return;
         }
         if (transitArray == null || transitArray.size() < 1) {
+            clear();
             return;
         }
         final ViewGroup parent = (ViewGroup) activity.findViewById(Window.ID_ANDROID_CONTENT);
@@ -204,6 +200,7 @@ public class TransitionHelper {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     startTranslateAnim(translateAnim, animView, targetAnim, transit);
+                    transit.bitmap.recycle();
                 }
             });
         } else {
@@ -236,6 +233,7 @@ public class TransitionHelper {
                 @Override
                 public void onAnimEnd() {
                     startTargetAnim(targetAnim);
+                    animView.destroyDrawingCache();
                 }
             });
         } else {
