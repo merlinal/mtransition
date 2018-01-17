@@ -8,8 +8,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Xfermode;
 
-import com.merlin.core.util.Util;
-import com.merlin.transition.R;
 import com.merlin.transition.model.Transit;
 
 /**
@@ -26,15 +24,15 @@ public class CircleAnimView extends AnimView {
     //画布高度
     private int canvasHeight = 1920;
     //画圆
-    private int cX;
-    private int cY;
-    private int radius;
-    private int maxRadius;
+    private int cX = 1080 / 2;
+    private int cY = 1920 / 2;
+    private int radius = 5;
+    private int maxRadius = 1920;
     private int increaseSpeed = 5;
     private boolean startCircleAnim = false;
 
     public CircleAnimView(Context context) {
-        this(context, Util.color(R.color.background));
+        this(context, 0xfff2f2f2);
         init(context);
     }
 
@@ -64,10 +62,38 @@ public class CircleAnimView extends AnimView {
         mCanvas = new Canvas(originalBitmap);
         startCircleAnim = true;
         cX = transit.targetWidth / 2 + transit.targetRect.left;
+        if (cX < 1) {
+            cX = transit.originWidth / 2 + transit.originRect.left;
+        }
         cY = transit.targetHeight / 2 + transit.targetRect.top - transit.statusBarHeight - transit.titleHeight;
+        if (cY < 1) {
+            cY = transit.originHeight / 2 + transit.originRect.top - transit.statusBarHeight - transit.titleHeight;
+        }
         radius = (int) Math.hypot(transit.targetWidth / 2, transit.targetHeight / 2);
+        if (radius < 1) {
+            radius = (int) Math.hypot(transit.originWidth / 2, transit.originHeight / 2);
+        }
         maxRadius = (int) Math.hypot(canvasWidth, canvasHeight);
-        setBackgroundColor(Util.color(R.color.trans));
+
+        if (canvasWidth < 1) {
+            canvasWidth = 1080;
+        }
+        if (canvasHeight < 1) {
+            canvasHeight = 1920;
+        }
+        if (cX < 1) {
+            cX = canvasWidth / 2;
+        }
+        if (cY < 1) {
+            cY = canvasHeight / 2;
+        }
+        if (radius < 1) {
+            radius = 5;
+        }
+        if (maxRadius < 1) {
+            maxRadius = (int) Math.hypot(canvasWidth, canvasHeight);
+        }
+        setBackgroundColor(0x00000000);
         invalidate();
     }
 

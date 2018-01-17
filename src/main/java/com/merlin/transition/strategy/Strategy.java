@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.merlin.core.util.Util;
 import com.merlin.transition.view.AnimView;
 import com.merlin.transition.view.CircleAnimView;
 
@@ -57,7 +56,7 @@ public class Strategy {
      * @return
      */
     public AnimView loadAnimView(Activity activity) {
-        return new CircleAnimView(activity, Util.color(com.merlin.core.R.color.background));
+        return new CircleAnimView(activity);
     }
 
 }

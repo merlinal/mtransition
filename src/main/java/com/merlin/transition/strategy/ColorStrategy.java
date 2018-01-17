@@ -7,18 +7,11 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 
-import com.merlin.core.util.Util;
-import com.merlin.transition.R;
-
 /**
  * Created by ncm on 2017/6/16.
  */
 
 public class ColorStrategy extends Strategy {
-
-    public ColorStrategy() {
-        this(Util.color(R.color.background), Util.color(R.color.primary));
-    }
 
     public ColorStrategy(int startColor, int endColor) {
         this.startColor = startColor;
@@ -33,7 +26,7 @@ public class ColorStrategy extends Strategy {
         AnimatorSet anim = new AnimatorSet();
         anim.play(ObjectAnimator.ofFloat(originView, "alpha", 1f, 1f));
         anim.setDuration(200);
-        return anim;
+        return null;
     }
 
     @Override

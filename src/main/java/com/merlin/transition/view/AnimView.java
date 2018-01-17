@@ -5,8 +5,6 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 
-import com.merlin.core.util.Util;
-import com.merlin.transition.R;
 import com.merlin.transition.model.Transit;
 
 /**
@@ -30,7 +28,7 @@ public abstract class AnimView extends RelativeLayout {
 
     public AnimView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        this.backgroundColor = Util.color(R.color.background);
+        this.backgroundColor = 0xfff2f2f2;
     }
 
     protected int backgroundColor;

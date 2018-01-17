@@ -20,6 +20,7 @@ import android.widget.RelativeLayout;
 
 import com.merlin.transition.model.Transit;
 import com.merlin.transition.model.Transits;
+import com.merlin.transition.strategy.ColorStrategy;
 import com.merlin.transition.strategy.Strategy;
 import com.merlin.transition.view.AnimView;
 
@@ -78,11 +79,27 @@ public class TransitionHelper {
         }
     }
 
+    public void start(final Activity activity, final int bgColor, final View... views) {
+        start(activity, new ColorStrategy(0xfff2f2f2, bgColor), 3 * 1000, views);
+    }
+
     public void start(final Activity activity, final Strategy strategy, final View... views) {
         start(activity, strategy, 3 * 1000, views);
     }
 
-    public void start(final Activity activity, final Strategy strategy, final long clearDelay, final View... views) {
+    private void start(final Activity activity, final Strategy strategy, final long clearDelay, final View... views) {
+        if (views == null || views.length < 1) {
+            return;
+        }
+        views[0].post(new Runnable() {
+            @Override
+            public void run() {
+                startTransition(activity, strategy, clearDelay, views);
+            }
+        });
+    }
+
+    private void startTransition(final Activity activity, final Strategy strategy, final long clearDelay, final View... views) {
         if (strategy == null || activity == null) {
             clear();
             return;
@@ -115,13 +132,8 @@ public class TransitionHelper {
                 if (strategy == null) {
                     return;
                 }
-                final AnimView animView = strategy.loadAnimView(activity);
-                if (animView != null) {
-                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                    parent.addView(animView, params);
-                    viewList.add(animView);
-                }
 
+                boolean isAddBackgroundView = false;
                 for (int i = 0; i < transitArray.size(); i++) {
                     final Transit transit = transitArray.get(i).transit;
                     if (transit == null) {
@@ -138,10 +150,15 @@ public class TransitionHelper {
                     if (targetView != null) {
                         //get Target View's position
                         targetView.getGlobalVisibleRect(transit.targetRect);
-                        transit.targetWidth = transit.targetRect.right - transit.targetRect.left;
-                        transit.targetHeight = transit.targetRect.bottom - transit.targetRect.top;
-                        transit.translationX = transit.targetRect.left + transit.targetWidth / 2 - transit.originRect.left - transit.originWidth / 2;
-                        transit.translationY = transit.targetRect.top + transit.targetHeight / 2 - transit.originRect.top - transit.originHeight / 2 - transit.statusBarHeight;
+                        if (transit.targetRect.right == 0 && transit.targetRect.bottom == 0) {
+                            transit.translationX = 0;
+                            transit.translationY = 0;
+                        } else {
+                            transit.targetWidth = transit.targetRect.right - transit.targetRect.left;
+                            transit.targetHeight = transit.targetRect.bottom - transit.targetRect.top;
+                            transit.translationX = transit.targetRect.left + transit.targetWidth / 2 - transit.originRect.left - transit.originWidth / 2;
+                            transit.translationY = transit.targetRect.top + transit.targetHeight / 2 - transit.originRect.top - transit.originHeight / 2 - transit.statusBarHeight;
+                        }
                     } else {
                         transit.targetRect.left = transit.originRect.left;
                         transit.targetRect.top = transit.originRect.top;
@@ -150,7 +167,13 @@ public class TransitionHelper {
                         transit.translationX = 0;
                         transit.translationY = 0;
                     }
-
+                    final AnimView animView = strategy.loadAnimView(activity);
+                    if (!isAddBackgroundView) {
+                        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+                        parent.addView(animView, params);
+                        viewList.add(animView);
+                        isAddBackgroundView = true;
+                    }
                     //create a temp ImageView to replace origin view
                     final ImageView originView = new ImageView(activity);
                     viewList.add(originView);
@@ -175,28 +198,28 @@ public class TransitionHelper {
 
                     //最后一个view时执行animView
                     if (i < transitArray.size() - 1) {
-                        startAnim(originAnim, translateAnim, null, targetAnim, transit);
+                        startOriginAnim(originAnim, translateAnim, null, targetAnim, transit);
                     } else {
-                        startAnim(originAnim, translateAnim, animView, targetAnim, transit);
+                        startOriginAnim(originAnim, translateAnim, animView, targetAnim, transit);
                     }
                 }
             }
         });
         //释放缓存
-        clear(clearDelay < 1 ? 5 * 1000 : clearDelay);
+        //clear(clearDelay < 1 ? 5 * 1000 : clearDelay);
     }
 
-    private void startAnim(final AnimatorSet originAnim, final AnimatorSet translateAnim, final AnimView animView, final AnimatorSet targetAnim, final Transit transit) {
-        if (originAnim != null) {
-            startOriginAnim(originAnim, translateAnim, animView, targetAnim, transit);
-        } else if (translateAnim != null) {
-            startTranslateAnim(translateAnim, animView, targetAnim, transit);
-        } else if (animView != null) {
-            startAnimView(animView, targetAnim, transit);
-        } else {
-            startTargetAnim(targetAnim);
-        }
-    }
+//    private void startAnim(final AnimatorSet originAnim, final AnimatorSet translateAnim, final AnimView animView, final AnimatorSet targetAnim, final Transit transit) {
+//        if (originAnim != null) {
+//            startOriginAnim(originAnim, translateAnim, animView, targetAnim, transit);
+//        } else if (translateAnim != null) {
+//            startTranslateAnim(translateAnim, animView, targetAnim, transit);
+//        } else if (animView != null) {
+//            startAnimView(animView, targetAnim, transit);
+//        } else {
+//            startTargetAnim(targetAnim);
+//        }
+//    }
 
     private void startOriginAnim(final AnimatorSet originAnim, final AnimatorSet translateAnim, final AnimView animView, final AnimatorSet targetAnim, final Transit transit) {
         if (originAnim != null) {
@@ -205,11 +228,12 @@ public class TransitionHelper {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     startTranslateAnim(translateAnim, animView, targetAnim, transit);
-                    transit.bitmap.recycle();
+                    //transit.bitmap.recycle();
                 }
             });
         } else {
-            startAnim(originAnim, translateAnim, animView, targetAnim, transit);
+            startTranslateAnim(translateAnim, animView, targetAnim, transit);
+            //startAnim(originAnim, translateAnim, animView, targetAnim, transit);
         }
     }
 
@@ -223,7 +247,8 @@ public class TransitionHelper {
                 }
             });
         } else {
-            startAnim(null, translateAnim, animView, targetAnim, transit);
+            startAnimView(animView, targetAnim, transit);
+            //startAnim(null, translateAnim, animView, targetAnim, transit);
         }
     }
 
@@ -241,13 +266,22 @@ public class TransitionHelper {
                 }
             });
         } else {
-            startAnim(null, null, animView, targetAnim, transit);
+            startTargetAnim(targetAnim);
+            //startAnim(null, null, animView, targetAnim, transit);
         }
     }
 
     private void startTargetAnim(AnimatorSet targetAnim) {
         if (targetAnim != null) {
             targetAnim.start();
+            targetAnim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    clear();
+                }
+            });
+        } else {
+            clear();
         }
     }
 
@@ -268,7 +302,7 @@ public class TransitionHelper {
                 transits.originView = null;
                 transits.targetView = null;
                 if (transits.transit != null) {
-                    transits.transit.bitmap.recycle();
+                    //transits.transit.bitmap.recycle();
                     transits.transit.bitmap = null;
                 }
                 transits.transit = null;
